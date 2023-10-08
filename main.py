@@ -61,9 +61,10 @@ parser.add_argument('--wd', '--weight-decay', default=1e-4, type=float,
                     dest='weight_decay')
 parser.add_argument('--scheduler', default='cosine', type=str,
                     metavar='N', help='scheduler [step|exp|cosine]')
-parser.add_argument('--use-amp', default=True, type=bool,
-                    metavar='AMP', help='use amp')
+parser.add_argument('--amp', default="16-mixed", type=str,
+                    metavar='AMP', help='amp mode: [16-mixed|bf16-mixed]')
 parser.add_argument('--compile', action='store_true', help='compile')
+parser.add_argument('--deepspeed', action='store_true', help='deepspeed')
 parser.add_argument('-p', '--print-freq', default=100, type=int,
                     metavar='N', help='print frequency (default: 100)')
 parser.add_argument('--resume', default='', type=str, metavar='PATH',
@@ -97,7 +98,10 @@ def main():
 
     args = parser.parse_args()
 
-    fabric = L.Fabric(precision="bf16-mixed", strategy="deepspeed_stage_2")
+    if args.deepspeed:
+        fabric = L.Fabric(precision=args.amp, strategy="deepspeed_stage_2")
+    else:
+        fabric = L.Fabric(precision=args.amp)
     fabric.launch()
 
     # Data loading code
@@ -192,7 +196,7 @@ def main():
                                             prefetch_factor=5, persistent_workers=True)
 
     # fabric data loader
-    train_loader, val_loader = fabric.setup_dataloaders(train_loader, val_loader)
+    # train_loader, val_loader = fabric.setup_dataloaders(train_loader, val_loader)
 
     for epoch in range(args.start_epoch, args.epochs):
 
