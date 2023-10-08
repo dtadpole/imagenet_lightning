@@ -44,7 +44,7 @@ parser.add_argument('-b', '--batch-size', default=256, type=int,
                     help='mini-batch size (default: 256), this is the total '
                          'batch size of all GPUs on the current node when '
                          'using Data Parallel or Distributed Data Parallel')
-parser.add_argument('--lr', '--learning-rate', default=3e-3, type=float,
+parser.add_argument('--lr', '--learning-rate', default=5e-3, type=float,
                     metavar='LR', help='initial learning rate', dest='lr')
 parser.add_argument('--optimizer', default='SGD', type=str, metavar='OPT',
                     help='optimizer [SGD|AdamW]')
@@ -173,7 +173,7 @@ def main():
         main_scheduler = ExponentialLR(optimizer, gamma=args.gamma)
     elif args.scheduler == 'cosine':
         """Sets the learning rate to the initial LR decayed by 0.9 each epoch"""
-        main_scheduler = CosineAnnealingLR(optimizer, iters_per_epoch*args.epochs, eta_min=3e-5)
+        main_scheduler = CosineAnnealingLR(optimizer, iters_per_epoch*args.epochs, eta_min=5e-5)
     else:
         raise Exception("unknown scheduler: ${args.scheduler}")
 
@@ -221,6 +221,8 @@ def main():
             images = images.to(fabric.device, non_blocking=True)
             target = target.to(fabric.device, non_blocking=True)
 
+            learning_rate = f"LR {','.join(['%.2e' % e for e in scheduler.get_last_lr()])}"
+
             optimizer.zero_grad()
             output = model(images)
             with fabric.autocast():
@@ -231,8 +233,9 @@ def main():
                 top1.update(acc1[0], images.size(0))
                 top5.update(acc5[0], images.size(0))
                 fabric.backward(loss)
+                optimizer.step()
 
-            optimizer.step()
+            scheduler.step()
 
             # measure elapsed time
             batch_time.update(time.time() - end)
@@ -240,14 +243,14 @@ def main():
 
             # display
             if (i+1) % args.print_freq == 0:
-                progress.display(i + 1)
+                progress.display(i + 1, optional=learning_rate)
 
         # evaluate
-        validate(val_loader, model, criterion, args)
+        validate(val_loader, model, criterion, fabric, args)
 
 
 
-def validate(val_loader, model, criterion, args):
+def validate(val_loader, model, criterion, fabric, args):
 
     def run_validate(loader, base_progress=0):
         with torch.no_grad():
@@ -272,7 +275,7 @@ def validate(val_loader, model, criterion, args):
                 batch_time.update(time.time() - end)
                 end = time.time()
 
-                if (i+1) % args.print_freq == 0:
+                if (i+1) % math.floor(args.print_freq / 5) == 0:
                     progress.display(i + 1)
 
     batch_time = AverageMeter('Time', ':6.3f', Summary.NONE)
