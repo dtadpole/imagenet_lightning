@@ -24,8 +24,8 @@ from torch.utils.data import Subset
 import lightning as L
 
 model_names = sorted(name for name in models.__dict__
-    if name.islower() and not name.startswith("__")
-    and callable(models.__dict__[name]))
+                     if name.islower() and not name.startswith("__")
+                     and callable(models.__dict__[name]))
 
 parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
 parser.add_argument('data', metavar='DIR', nargs='?', default='.',
@@ -75,23 +75,12 @@ parser.add_argument('--pretrained', dest='pretrained', action='store_true',
                     help='use pre-trained model')
 parser.add_argument('--world-size', default=1, type=int,
                     help='number of nodes for distributed training')
-parser.add_argument('--rank', default=0, type=int,
-                    help='node rank for distributed training')
-parser.add_argument('--dist-url', default='tcp://127.0.0.1:23456', type=str,
-                    help='url used to set up distributed training')
-parser.add_argument('--dist-backend', default='nccl', type=str,
-                    help='distributed backend')
-parser.add_argument('--gpu', default=None, type=int,
-                    help='GPU id to use.')
-parser.add_argument('--multiprocessing-distributed', action='store_true',
-                    help='Use multi-processing distributed training to launch '
-                         'N processes per node, which has N GPUs. This is the '
-                         'fastest way to use PyTorch for either single node or '
-                         'multi node data parallel training')
-parser.add_argument('--dummy', action='store_true', help="use fake data to benchmark")
+parser.add_argument('--dummy', action='store_true',
+                    help="use fake data to benchmark")
 
 best_acc1 = 0
 torch.set_float32_matmul_precision('medium')
+
 
 def main():
     global best_acc1
@@ -107,13 +96,15 @@ def main():
     # Data loading code
     if args.dummy:
         print("=> Dummy data is used!")
-        train_dataset = datasets.FakeData(1281167, (3, 224, 224), 1000, transforms.ToTensor())
-        val_dataset = datasets.FakeData(50000, (3, 224, 224), 1000, transforms.ToTensor())
+        train_dataset = datasets.FakeData(
+            1281167, (3, 224, 224), 1000, transforms.ToTensor())
+        val_dataset = datasets.FakeData(
+            50000, (3, 224, 224), 1000, transforms.ToTensor())
     else:
         traindir = os.path.join(args.data, 'train')
         valdir = os.path.join(args.data, 'val')
         normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                     std=[0.229, 0.224, 0.225])
+                                         std=[0.229, 0.224, 0.225])
 
         train_dataset = datasets.ImageFolder(
             traindir,
@@ -133,9 +124,11 @@ def main():
                 normalize,
             ]))
 
-    train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
-    val_sampler = torch.utils.data.distributed.DistributedSampler(val_dataset, shuffle=False, drop_last=True)
-    
+    train_sampler = torch.utils.data.distributed.DistributedSampler(
+        train_dataset)
+    val_sampler = torch.utils.data.distributed.DistributedSampler(
+        val_dataset, shuffle=False, drop_last=True)
+
     # define loss function (criterion), optimizer, and learning rate scheduler
     criterion = nn.CrossEntropyLoss()
 
@@ -153,7 +146,7 @@ def main():
                                     weight_decay=args.weight_decay)
     elif args.optimizer == 'Adam':
         optimizer = torch.optim.Adam(model.parameters(), lr=args.lr,
-                                      betas=(args.beta1, args.beta2))
+                                     betas=(args.beta1, args.beta2))
     elif args.optimizer == 'AdamW':
         optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr,
                                       betas=(args.beta1, args.beta2),
@@ -162,25 +155,29 @@ def main():
         raise Exception("unknown optimizer: ${args.optimizer}")
 
     # iters_per_epoch = math.floor(len(train_loader) / args.batch_size)
-    iters_per_epoch = math.floor(len(train_dataset) / args.batch_size / torch.cuda.device_count())
+    iters_per_epoch = math.floor(
+        len(train_dataset) / args.batch_size / torch.cuda.device_count())
     print(f'iters_per_epoch: {iters_per_epoch}')
 
     if args.scheduler == 'step':
         """Sets the learning rate to the initial LR decayed by 0.9 every 2 epochs"""
-        main_scheduler = StepLR(optimizer, step_size=2*iters_per_epoch, gamma=args.gamma)
+        main_scheduler = StepLR(
+            optimizer, step_size=2*iters_per_epoch, gamma=args.gamma)
     elif args.scheduler == 'exp':
         """Sets the learning rate to the initial LR decayed by 0.9 each epoch"""
         main_scheduler = ExponentialLR(optimizer, gamma=args.gamma)
     elif args.scheduler == 'cosine':
         """Sets the learning rate to the initial LR decayed by 0.9 each epoch"""
-        main_scheduler = CosineAnnealingLR(optimizer, iters_per_epoch*args.epochs, eta_min=5e-5)
+        main_scheduler = CosineAnnealingLR(
+            optimizer, iters_per_epoch*args.epochs, eta_min=5e-5)
     else:
         raise Exception("unknown scheduler: ${args.scheduler}")
 
     # warm up with one epoch data
-    warmup_scheduler = LinearLR(optimizer, start_factor=1e-4, end_factor=1.0, total_iters=math.floor(iters_per_epoch/2))
+    warmup_scheduler = LinearLR(optimizer, start_factor=1e-4,
+                                end_factor=1.0, total_iters=math.floor(iters_per_epoch/2))
     scheduler = ChainedScheduler([warmup_scheduler, main_scheduler])
-    
+
     # setup model and optimizer
     model, optimizer = fabric.setup(model, optimizer)
 
@@ -189,11 +186,11 @@ def main():
 
     # data loader
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch_size, shuffle=False,
-                                            num_workers=args.workers, pin_memory=True, sampler=train_sampler,
-                                            prefetch_factor=5, persistent_workers=True)
+                                               num_workers=args.workers, pin_memory=True, sampler=train_sampler,
+                                               prefetch_factor=5, persistent_workers=True)
     val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False,
-                                            num_workers=args.workers, pin_memory=True, sampler=val_sampler,
-                                            prefetch_factor=5, persistent_workers=True)
+                                             num_workers=args.workers, pin_memory=True, sampler=val_sampler,
+                                             prefetch_factor=5, persistent_workers=True)
 
     # fabric data loader
     # train_loader, val_loader = fabric.setup_dataloaders(train_loader, val_loader)
@@ -249,7 +246,6 @@ def main():
         validate(val_loader, model, criterion, fabric, args)
 
 
-
 def validate(val_loader, model, criterion, fabric, args):
 
     def run_validate(loader, base_progress=0):
@@ -302,7 +298,7 @@ def validate(val_loader, model, criterion, fabric, args):
             num_workers=args.workers, pin_memory=True)
         run_validate(aux_val_loader, len(val_loader))
 
-    progress.display_summary()
+    # progress.display_summary()
 
     return top1.avg
 
@@ -312,14 +308,17 @@ def save_checkpoint(state, is_best, filename='checkpoint.pth'):
     if is_best:
         shutil.copyfile(filename, f'{filename}.best')
 
+
 class Summary(Enum):
     NONE = 0
     AVERAGE = 1
     SUM = 2
     COUNT = 3
 
+
 class AverageMeter(object):
     """Computes and stores the average and current value"""
+
     def __init__(self, name, fmt=':f', summary_type=Summary.AVERAGE):
         self.name = name
         self.fmt = fmt
@@ -345,7 +344,8 @@ class AverageMeter(object):
             device = torch.device("mps")
         else:
             device = torch.device("cpu")
-        total = torch.tensor([self.sum, self.count], dtype=torch.float32, device=device)
+        total = torch.tensor([self.sum, self.count],
+                             dtype=torch.float32, device=device)
         dist.all_reduce(total, dist.ReduceOp.SUM, async_op=False)
         self.sum, self.count = total.tolist()
         self.avg = self.sum / self.count
@@ -392,6 +392,7 @@ class ProgressMeter(object):
         num_digits = len(str(num_batches // 1))
         fmt = '{:' + str(num_digits) + 'd}'
         return '[' + fmt + '/' + fmt.format(num_batches) + ']'
+
 
 def accuracy(output, target, topk=(1,)):
     """Computes the accuracy over the k top predictions for the specified values of k"""
