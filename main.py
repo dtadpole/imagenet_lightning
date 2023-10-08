@@ -56,8 +56,8 @@ parser.add_argument('--beta2', default=0.999, type=float, metavar='B2',
                     help='beta2')
 parser.add_argument('--gamma', default=0.9, type=float, metavar='GAMMA',
                     help='gamma')
-parser.add_argument('--wd', '--weight-decay', default=3e-5, type=float,
-                    metavar='W', help='weight decay (default: 3e-5)',
+parser.add_argument('--wd', '--weight-decay', default=1e-4, type=float,
+                    metavar='W', help='weight decay (default: 1e-4)',
                     dest='weight_decay')
 parser.add_argument('--scheduler', default='cosine', type=str,
                     metavar='N', help='scheduler [step|exp|cosine]')
@@ -97,7 +97,7 @@ def main():
 
     args = parser.parse_args()
 
-    fabric = L.Fabric(precision="16-mixed", strategy="deepspeed_stage_2")
+    fabric = L.Fabric(precision="bf16-mixed", strategy="deepspeed_stage_2")
     fabric.launch()
 
     # Data loading code
@@ -276,7 +276,7 @@ def validate(val_loader, model, criterion, args):
     top1 = AverageMeter('Acc@1', ':6.2f', Summary.AVERAGE)
     top5 = AverageMeter('Acc@5', ':6.2f', Summary.AVERAGE)
     progress = ProgressMeter(
-        len(val_loader) + (args.distributed and (len(val_loader.sampler) * args.world_size < len(val_loader.dataset))),
+        len(val_loader),
         [batch_time, losses, top1, top5],
         prefix='Test: ')
 
@@ -284,11 +284,10 @@ def validate(val_loader, model, criterion, args):
     model.eval()
 
     run_validate(val_loader)
-    if args.distributed:
-        top1.all_reduce()
-        top5.all_reduce()
+    top1.all_reduce()
+    top5.all_reduce()
 
-    if args.distributed and (len(val_loader.sampler) * args.world_size < len(val_loader.dataset)):
+    if len(val_loader.sampler) * args.world_size < len(val_loader.dataset):
         aux_val_dataset = Subset(val_loader.dataset,
                                  range(len(val_loader.sampler) * args.world_size, len(val_loader.dataset)))
         aux_val_loader = torch.utils.data.DataLoader(
