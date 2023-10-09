@@ -22,6 +22,7 @@ import torchvision.transforms as transforms
 from torch.optim.lr_scheduler import StepLR, ExponentialLR, LinearLR, ChainedScheduler, CosineAnnealingLR
 from torch.utils.data import Subset
 import lightning as L
+from lightning.fabric.accelerators import find_usable_cuda_devices
 
 model_names = sorted(name for name in models.__dict__
                      if name.islower() and not name.startswith("__")
@@ -67,6 +68,8 @@ parser.add_argument('--compile', action='store_true', help='compile')
 parser.add_argument('--deepspeed', action='store_true', help='deepspeed')
 parser.add_argument('-p', '--print-freq', default=100, type=int,
                     metavar='N', help='print frequency (default: 100)')
+parser.add_argument('-g', '--gpu', default=None, type=str,
+                    metavar='GPU', help='gpu (default None)')
 parser.add_argument('--resume', default='', type=str, metavar='PATH',
                     help='path to latest checkpoint (default: none)')
 parser.add_argument('-e', '--evaluate', dest='evaluate', action='store_true',
@@ -88,9 +91,21 @@ def main():
     args = parser.parse_args()
 
     if args.deepspeed:
-        fabric = L.Fabric(precision=args.amp, strategy="deepspeed_stage_2")
+        strategy = "deepspeed_stage_2"
     else:
-        fabric = L.Fabric(precision=args.amp)
+        strategy = "auto"
+
+    if args.gpu:
+        accelerator = "cuda"
+        devices = args.gpu
+    else:
+        accelerator = "auto"
+        devices = "auto"
+
+    precision = args.amp
+
+    fabric = L.Fabric(precision=precision, strategy=strategy,
+                      accelerator=accelerator, devices=devices)
     fabric.launch()
 
     # Data loading code
@@ -124,11 +139,6 @@ def main():
                 normalize,
             ]))
 
-    train_sampler = torch.utils.data.distributed.DistributedSampler(
-        train_dataset)
-    val_sampler = torch.utils.data.distributed.DistributedSampler(
-        val_dataset, shuffle=False, drop_last=True)
-
     # define loss function (criterion), optimizer, and learning rate scheduler
     criterion = nn.CrossEntropyLoss()
 
@@ -156,7 +166,7 @@ def main():
 
     # iters_per_epoch = math.floor(len(train_loader) / args.batch_size)
     iters_per_epoch = math.floor(
-        len(train_dataset) / args.batch_size / torch.cuda.device_count())
+        len(train_dataset) / args.batch_size / fabric.world_size)
     print(f'iters_per_epoch: {iters_per_epoch}')
 
     if args.scheduler == 'step':
@@ -184,13 +194,28 @@ def main():
     if args.compile:
         model = torch.compile(model)
 
-    # data loader
-    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch_size, shuffle=False,
-                                               num_workers=args.workers, pin_memory=True, sampler=train_sampler,
-                                               prefetch_factor=5, persistent_workers=True)
-    val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False,
-                                             num_workers=args.workers, pin_memory=True, sampler=val_sampler,
-                                             prefetch_factor=5, persistent_workers=True)
+    if fabric.world_size > 1:
+        train_sampler = torch.utils.data.distributed.DistributedSampler(
+            train_dataset)
+        val_sampler = torch.utils.data.distributed.DistributedSampler(
+            val_dataset, shuffle=False, drop_last=True)
+
+        # data loader
+        train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch_size, shuffle=False,
+                                                   num_workers=args.workers, pin_memory=True, sampler=train_sampler,
+                                                   prefetch_factor=5, persistent_workers=True)
+        val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False,
+                                                 num_workers=args.workers, pin_memory=True, sampler=val_sampler,
+                                                 prefetch_factor=5, persistent_workers=True)
+    else:
+        train_loader = torch.utils.data.DataLoader(
+            train_dataset, batch_size=args.batch_size, shuffle=True,
+            num_workers=args.workers, pin_memory=True,
+            prefetch_factor=5, persistent_workers=True)
+        val_loader = torch.utils.data.DataLoader(
+            val_dataset, batch_size=args.batch_size, shuffle=False,
+            num_workers=args.workers, pin_memory=True,
+            prefetch_factor=5, persistent_workers=True)
 
     # fabric data loader
     # train_loader, val_loader = fabric.setup_dataloaders(train_loader, val_loader)
