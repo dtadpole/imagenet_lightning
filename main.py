@@ -34,7 +34,7 @@ parser.add_argument('data', metavar='DIR', nargs='?', default='.',
 parser.add_argument('-a', '--arch', metavar='ARCH', default='resnet18',
                     choices=model_names,
                     help='model architecture: (default: resnet18)')
-parser.add_argument('-j', '--workers', default=12, type=int, metavar='N',
+parser.add_argument('-j', '--workers', default=8, type=int, metavar='N',
                     help='number of data loading workers (default: 12)')
 parser.add_argument('--epochs', default=50, type=int, metavar='N',
                     help='number of total epochs to run')
@@ -45,7 +45,7 @@ parser.add_argument('-b', '--batch-size', default=256, type=int,
                     help='mini-batch size (default: 256), this is the total '
                          'batch size of all GPUs on the current node when '
                          'using Data Parallel or Distributed Data Parallel')
-parser.add_argument('--lr', '--learning-rate', default=5e-3, type=float,
+parser.add_argument('--lr', '--learning-rate', default=3e-3, type=float,
                     metavar='LR', help='initial learning rate', dest='lr')
 parser.add_argument('--optimizer', default='SGD', type=str, metavar='OPT',
                     help='optimizer [SGD|AdamW]')
@@ -62,6 +62,8 @@ parser.add_argument('--wd', '--weight-decay', default=1e-4, type=float,
                     dest='weight_decay')
 parser.add_argument('--scheduler', default='cosine', type=str,
                     metavar='N', help='scheduler [step|exp|cosine]')
+parser.add_argument('--eta-min', default=3e-4, type=float, metavar='ETAMIN',
+                    help='eta-min (default: 3e-4)')
 parser.add_argument('--amp', default="16-mixed", type=str,
                     metavar='AMP', help='amp mode: [16-mixed|bf16-mixed]')
 parser.add_argument('--compile', action='store_true', help='compile')
@@ -179,7 +181,7 @@ def main():
     elif args.scheduler == 'cosine':
         """Sets the learning rate to the initial LR decayed by 0.9 each epoch"""
         main_scheduler = CosineAnnealingLR(
-            optimizer, iters_per_epoch*args.epochs, eta_min=5e-5)
+            optimizer, iters_per_epoch*args.epochs, eta_min=args.eta_min)
     else:
         raise Exception("unknown scheduler: ${args.scheduler}")
 
