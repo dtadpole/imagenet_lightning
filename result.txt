@@ -1,2 +1,6 @@
-vit_b_16 [Epoch:46]
+vit_b_16 [Epoch:46] (lr=5e-3)
     *   Acc@1 45.362 Acc@5 68.340
+vit_b_16 [Epoch:50] (lower lr)
+    *   Acc@1 37.364 Acc@5 62.194
+vit_b_16 [Epoch:50] (lr=1e-3)
+    *   Acc@1 43.820 Acc@5 67.164
