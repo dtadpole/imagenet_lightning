@@ -198,9 +198,9 @@ def main():
 
     if fabric.world_size > 1:
         train_sampler = torch.utils.data.distributed.DistributedSampler(
-            train_dataset)
+            train_dataset, shuffle=True, drop_last=False)
         val_sampler = torch.utils.data.distributed.DistributedSampler(
-            val_dataset, shuffle=True, drop_last=True)
+            val_dataset, shuffle=True, drop_last=False)
 
         # data loader
         train_loader = torch.utils.data.DataLoader(
@@ -217,7 +217,7 @@ def main():
             num_workers=args.workers, pin_memory=True,
             prefetch_factor=5)
         val_loader = torch.utils.data.DataLoader(
-            val_dataset, batch_size=args.batch_size, shuffle=False,
+            val_dataset, batch_size=args.batch_size, shuffle=True,
             num_workers=args.workers, pin_memory=True,
             prefetch_factor=5)
 
