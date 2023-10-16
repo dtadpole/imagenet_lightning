@@ -29,13 +29,13 @@ model_names = sorted(name for name in models.__dict__
                      and callable(models.__dict__[name]))
 
 parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
-parser.add_argument('data', metavar='DIR', nargs='?', default='.',
-                    help='path to dataset (default: .)')
+parser.add_argument('-d', '--data', metavar='DIR', nargs='?', default='./imagenet/',
+                    help='path to dataset (default: ./imagenet/)')
 parser.add_argument('-a', '--arch', metavar='ARCH', default='resnet18',
                     choices=model_names,
                     help='model architecture: (default: resnet18)')
-parser.add_argument('-j', '--workers', default=6, type=int, metavar='N',
-                    help='number of data loading workers (default: 6)')
+parser.add_argument('-j', '--workers', default=5, type=int, metavar='N',
+                    help='number of data loading workers (default: 5)')
 parser.add_argument('--epochs', default=100, type=int, metavar='N',
                     help='number of total epochs to run')
 parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
@@ -203,24 +203,26 @@ def main():
             val_dataset, shuffle=False, drop_last=True)
 
         # data loader
-        train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch_size, shuffle=False,
-                                                   num_workers=args.workers, pin_memory=True, sampler=train_sampler,
-                                                   prefetch_factor=5, persistent_workers=True)
-        val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False,
-                                                 num_workers=args.workers, pin_memory=True, sampler=val_sampler,
-                                                 prefetch_factor=5, persistent_workers=True)
+        train_loader = torch.utils.data.DataLoader(
+            train_dataset, batch_size=args.batch_size, shuffle=False,
+            num_workers=args.workers, pin_memory=True, sampler=train_sampler,
+            prefetch_factor=5)
+        val_loader = torch.utils.data.DataLoader(
+            val_dataset, batch_size=args.batch_size, shuffle=False,
+            num_workers=args.workers, pin_memory=True, sampler=val_sampler,
+            prefetch_factor=5)
     else:
         train_loader = torch.utils.data.DataLoader(
             train_dataset, batch_size=args.batch_size, shuffle=True,
             num_workers=args.workers, pin_memory=True,
-            prefetch_factor=5, persistent_workers=True)
+            prefetch_factor=5)
         val_loader = torch.utils.data.DataLoader(
             val_dataset, batch_size=args.batch_size, shuffle=False,
             num_workers=args.workers, pin_memory=True,
-            prefetch_factor=5, persistent_workers=True)
+            prefetch_factor=5)
 
     # fabric data loader
-    # train_loader, val_loader = fabric.setup_dataloaders(train_loader, val_loader)
+    train_loader, val_loader = fabric.setup_dataloaders(train_loader, val_loader)
 
     for epoch in range(args.start_epoch, args.epochs):
 
@@ -298,7 +300,7 @@ def validate(val_loader, model, criterion, fabric, args):
                 batch_time.update(time.time() - end)
                 end = time.time()
 
-                if (i+1) % math.floor(args.print_freq / 5) == 0:
+                if (i+1) % math.floor(args.print_freq / 2) == 0:
                     progress.display(i + 1)
 
     batch_time = AverageMeter('Time', ':6.3f', Summary.NONE)
