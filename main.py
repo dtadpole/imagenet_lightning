@@ -127,7 +127,7 @@ def main():
             traindir,
             transforms.Compose([
                 transforms.RandomResizedCrop(224, scale=(0.25, 1.0)),
-                # transforms.RandomHorizontalFlip(),
+                transforms.RandomHorizontalFlip(),
                 transforms.ToTensor(),
                 normalize,
             ]))
