@@ -36,7 +36,7 @@ parser.add_argument('-a', '--arch', metavar='ARCH', default='resnet18',
                     help='model architecture: (default: resnet18)')
 parser.add_argument('-j', '--workers', default=6, type=int, metavar='N',
                     help='number of data loading workers (default: 6)')
-parser.add_argument('--epochs', default=50, type=int, metavar='N',
+parser.add_argument('--epochs', default=100, type=int, metavar='N',
                     help='number of total epochs to run')
 parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
                     help='manual epoch number (useful on restarts)')
@@ -298,7 +298,7 @@ def validate(val_loader, model, criterion, fabric, args):
                 batch_time.update(time.time() - end)
                 end = time.time()
 
-                if (i+1) % math.floor(args.print_freq / 20) == 0:
+                if (i+1) % math.floor(args.print_freq / 5) == 0:
                     progress.display(i + 1)
 
     batch_time = AverageMeter('Time', ':6.3f', Summary.NONE)
