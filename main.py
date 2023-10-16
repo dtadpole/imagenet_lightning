@@ -200,7 +200,7 @@ def main():
         train_sampler = torch.utils.data.distributed.DistributedSampler(
             train_dataset)
         val_sampler = torch.utils.data.distributed.DistributedSampler(
-            val_dataset, shuffle=False, drop_last=True)
+            val_dataset, shuffle=True, drop_last=False)
 
         # data loader
         train_loader = torch.utils.data.DataLoader(
