@@ -31,9 +31,9 @@ model_names = sorted(name for name in models.__dict__
 parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
 parser.add_argument('-d', '--data', metavar='DIR', nargs='?', default='./imagenet/',
                     help='path to dataset (default: ./imagenet/)')
-parser.add_argument('-a', '--arch', metavar='ARCH', default='resnet18',
+parser.add_argument('-a', '--arch', metavar='ARCH', default='vit_b_16',
                     choices=model_names,
-                    help='model architecture: (default: resnet18)')
+                    help='model architecture: (default: vit_b_16)')
 parser.add_argument('-j', '--workers', default=5, type=int, metavar='N',
                     help='number of data loading workers (default: 5)')
 parser.add_argument('--epochs', default=100, type=int, metavar='N',
@@ -45,7 +45,7 @@ parser.add_argument('-b', '--batch-size', default=256, type=int,
                     help='mini-batch size (default: 256), this is the total '
                          'batch size of all GPUs on the current node when '
                          'using Data Parallel or Distributed Data Parallel')
-parser.add_argument('--lr', '--learning-rate', default=1e-3, type=float,
+parser.add_argument('--lr', '--learning-rate', default=3e-4, type=float,
                     metavar='LR', help='initial learning rate', dest='lr')
 parser.add_argument('--lr-end', default=3e-5, type=float, metavar='LREND',
                     help='lr-end (default: 3e-5)')
@@ -59,8 +59,8 @@ parser.add_argument('--beta2', default=0.999, type=float, metavar='B2',
                     help='beta2')
 parser.add_argument('--gamma', default=0.9, type=float, metavar='GAMMA',
                     help='gamma')
-parser.add_argument('--wd', '--weight-decay', default=0.03, type=float,
-                    metavar='W', help='weight decay (default: 0.03)',
+parser.add_argument('--wd', '--weight-decay', default=0.01, type=float,
+                    metavar='W', help='weight decay (default: 0.01)',
                     dest='weight_decay')
 parser.add_argument('--scheduler', default='linear', type=str,
                     metavar='N', help='scheduler [step|exp|cosine|linear]')
