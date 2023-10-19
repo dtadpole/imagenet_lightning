@@ -47,8 +47,8 @@ parser.add_argument('-b', '--batch-size', default=256, type=int,
                          'using Data Parallel or Distributed Data Parallel')
 parser.add_argument('--lr', '--learning-rate', default=3e-4, type=float,
                     metavar='LR', help='initial learning rate', dest='lr')
-parser.add_argument('--lr-end', default=3e-5, type=float, metavar='LREND',
-                    help='lr-end (default: 3e-5)')
+parser.add_argument('--lr-end', default=1e-5, type=float, metavar='LREND',
+                    help='lr-end (default: 1e-5)')
 parser.add_argument('--optimizer', default='AdamW', type=str, metavar='OPT',
                     help='optimizer [SGD|Adam|AdamW]')
 parser.add_argument('--momentum', default=0.9, type=float, metavar='M',
@@ -276,6 +276,9 @@ def main():
             # display
             if (i+1) % args.print_freq == 0:
                 progress.display(i + 1, optional=learning_rate)
+
+        # display last batch
+        progress.display(iters_per_epoch, optional=learning_rate)
 
         # evaluate
         validate(val_loader, model, criterion, fabric, args)

@@ -1,16 +1,18 @@
-vit_b_16 [Epoch:46] (lr=5e-3)
+==============================
+
+vit_b_16 [Epoch:46] (lr=5e-3, SGD)
     *   Acc@1 45.362 Acc@5 68.340
-vit_b_16 [Epoch:50] (lower lr)
+vit_b_16 [Epoch:50] (lower lr, SGD)
     *   Acc@1 37.364 Acc@5 62.194
-vit_b_16 [Epoch:50] (lr=1e-3)
+vit_b_16 [Epoch:50] (lr=1e-3, SGD)
     *   Acc@1 43.820 Acc@5 67.164
-maxvit_t [Epoch: 100] (lr=1e-3)
+maxvit_t [Epoch: 100] (lr=1e-3, SGD)
     *   Acc@1 72.006 Acc@5 90.360
-vit_b_16 [Epoch: 88] (lr=1e-3)
+vit_b_16 [Epoch: 88] (lr=1e-3, SGD)
     *   Acc@1 48.187 Acc@5 70.025
 
 
-=====================
+==============================
 
 (data='./imagenet/', arch='vit_b_16', workers=5, epochs=100, start_epoch=0, batch_size=128, lr=0.001, lr_min=3e-05, optimizer='AdamW', momentum=0.9,
 beta1=0.9, beta2=0.999, gamma=0.9, weight_decay=0.01, scheduler='cosine', amp='bf16-mixed', compile=True, deepspeed=False, print_freq=100, gpu=None,
@@ -23,8 +25,20 @@ resume='', evaluate=False, pretrained=False, world_size=1, dummy=False)
 #4  *   Acc@1 33.393 Acc@5 57.695
 #5  *   Acc@1 36.279 Acc@5 60.619
 #6  *   Acc@1 39.397 Acc@5 64.089
+#7  *   Acc@1 41.707 Acc@5 66.465
+#8  *   Acc@1 43.869 Acc@5 68.429
 
-=====================
+==============================
+
+(data='./imagenet/', arch='vit_b_16', workers=5, epochs=100, start_epoch=0, batch_size=128, lr=0.0003, lr_end=3e-05, optimizer='AdamW', momentum=0.9,
+beta1=0.9, beta2=0.999, gamma=0.9, weight_decay=0.01, scheduler='linear', amp='bf16-mixed', compile=True, deepspeed=False, print_freq=100, gpu=None,
+resume='', evaluate=False, pretrained=False, world_size=1, dummy=False)
+
+#0  *   Acc@1 15.888 Acc@5 34.735
+#1  *   Acc@1 29.067 Acc@5 53.135
+#2
+
+############################################################
 
 (data='./imagenet/', arch='vit_l_16', workers=5, epochs=100, start_epoch=0, batch_size=64, lr=0.001, lr_end=3e-05, optimizer='AdamW', momentum=0.9,
 beta1=0.9, beta2=0.999, gamma=0.9, weight_decay=0.03, scheduler='linear', amp='bf16-mixed', compile=True, deepspeed=False, print_freq=100, gpu=None,
@@ -32,7 +46,7 @@ resume='', evaluate=False, pretrained=False, world_size=1, dummy=False)
 
 #0  *   Acc@1 5.530 Acc@5 14.596
 
-=====================
+==============================
 
 (data='./imagenet/', arch='vit_l_16', workers=5, epochs=100, start_epoch=0, batch_size=64, lr=0.001, lr_end=3e-05, optimizer='AdamW', momentum=0.9,
 beta1=0.9, beta2=0.999, gamma=0.9, weight_decay=0.01, scheduler='linear', amp='bf16-mixed', compile=True, deepspeed=False, print_freq=100, gpu=None,
@@ -40,12 +54,21 @@ resume='', evaluate=False, pretrained=False, world_size=1, dummy=False)
 
 #0  *   Acc@1 5.052 Acc@5 13.800
 
-=====================
+==============================
 
 (data='./imagenet/', arch='vit_l_16', workers=5, epochs=100, start_epoch=0, batch_size=64, lr=0.0003, lr_end=3e-05, optimizer='AdamW', momentum=0.9,
 beta1=0.9, beta2=0.999, gamma=0.9, weight_decay=0.01, scheduler='linear', amp='bf16-mixed', compile=True, deepspeed=False, print_freq=100, gpu=None,
 resume='', evaluate=False, pretrained=False, world_size=1, dummy=False)
 
-#0
+#0  *   Acc@1 8.914 Acc@5 22.572
 
-=====================
+==============================
+
+(data='./imagenet/', arch='vit_l_16', workers=5, epochs=100, start_epoch=0, batch_size=64, lr=0.0001, lr_end=1e-05, optimizer='AdamW', momentum=0.9,
+beta1=0.9, beta2=0.999, gamma=0.9, weight_decay=0.01, scheduler='linear', amp='bf16-mixed', compile=True, deepspeed=False, print_freq=100, gpu=None,
+resume='', evaluate=False, pretrained=False, world_size=1, dummy=False)
+
+#0  *   Acc@1 16.264 Acc@5 35.996
+#1
+
+==============================
