@@ -49,8 +49,8 @@ parser.add_argument('--lr', '--learning-rate', default=3e-3, type=float,
                     metavar='LR', help='initial learning rate', dest='lr')
 parser.add_argument('--lr-min', default=3e-5, type=float, metavar='LRMIN',
                     help='lr-min (default: 3e-5)')
-parser.add_argument('--optimizer', default='SGD', type=str, metavar='OPT',
-                    help='optimizer [SGD|AdamW]')
+parser.add_argument('--optimizer', default='AdamW', type=str, metavar='OPT',
+                    help='optimizer [SGD|Adam|AdamW]')
 parser.add_argument('--momentum', default=0.9, type=float, metavar='M',
                     help='momentum')
 parser.add_argument('--beta1', default=0.9, type=float, metavar='B1',
