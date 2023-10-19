@@ -45,7 +45,7 @@ parser.add_argument('-b', '--batch-size', default=256, type=int,
                     help='mini-batch size (default: 256), this is the total '
                          'batch size of all GPUs on the current node when '
                          'using Data Parallel or Distributed Data Parallel')
-parser.add_argument('--lr', '--learning-rate', default=3e-3, type=float,
+parser.add_argument('--lr', '--learning-rate', default=1e-3, type=float,
                     metavar='LR', help='initial learning rate', dest='lr')
 parser.add_argument('--lr-min', default=3e-5, type=float, metavar='LRMIN',
                     help='lr-min (default: 3e-5)')
