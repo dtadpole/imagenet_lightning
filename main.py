@@ -91,6 +91,7 @@ def main():
     global best_acc1
 
     args = parser.parse_args()
+    print(args)
 
     if args.deepspeed:
         strategy = "deepspeed_stage_2"
