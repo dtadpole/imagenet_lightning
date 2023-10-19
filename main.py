@@ -59,12 +59,12 @@ parser.add_argument('--beta2', default=0.999, type=float, metavar='B2',
                     help='beta2')
 parser.add_argument('--gamma', default=0.9, type=float, metavar='GAMMA',
                     help='gamma')
-parser.add_argument('--wd', '--weight-decay', default=1e-3, type=float,
-                    metavar='W', help='weight decay (default: 1e-3)',
+parser.add_argument('--wd', '--weight-decay', default=1e-2, type=float,
+                    metavar='W', help='weight decay (default: 1e-2)',
                     dest='weight_decay')
 parser.add_argument('--scheduler', default='cosine', type=str,
                     metavar='N', help='scheduler [step|exp|cosine]')
-parser.add_argument('--amp', default="16-mixed", type=str,
+parser.add_argument('--amp', default="bf16-mixed", type=str,
                     metavar='AMP', help='amp mode: [16-mixed|bf16-mixed]')
 parser.add_argument('--compile', action='store_true', help='compile')
 parser.add_argument('--deepspeed', action='store_true', help='deepspeed')
