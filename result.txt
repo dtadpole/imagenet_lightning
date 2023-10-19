@@ -36,7 +36,10 @@ resume='', evaluate=False, pretrained=False, world_size=1, dummy=False)
 
 #0  *   Acc@1 15.888 Acc@5 34.735
 #1  *   Acc@1 29.067 Acc@5 53.135
-#2
+#2  *   Acc@1 37.969 Acc@5 62.935
+#3  *   Acc@1 44.089 Acc@5 69.201
+#4  *   Acc@1 48.891 Acc@5 73.425
+#5  *   Acc@1 51.799 Acc@5 75.992
 
 ############################################################
 
@@ -69,6 +72,7 @@ beta1=0.9, beta2=0.999, gamma=0.9, weight_decay=0.01, scheduler='linear', amp='b
 resume='', evaluate=False, pretrained=False, world_size=1, dummy=False)
 
 #0  *   Acc@1 16.264 Acc@5 35.996
-#1
+#1  *   Acc@1 29.948 Acc@5 54.464
+#2  *   Acc@1 38.480 Acc@5 63.744
 
 ==============================
