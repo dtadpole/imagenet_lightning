@@ -47,8 +47,8 @@ parser.add_argument('-b', '--batch-size', default=256, type=int,
                          'using Data Parallel or Distributed Data Parallel')
 parser.add_argument('--lr', '--learning-rate', default=1e-3, type=float,
                     metavar='LR', help='initial learning rate', dest='lr')
-parser.add_argument('--lr-min', default=3e-5, type=float, metavar='LRMIN',
-                    help='lr-min (default: 3e-5)')
+parser.add_argument('--lr-end', default=3e-5, type=float, metavar='LREND',
+                    help='lr-end (default: 3e-5)')
 parser.add_argument('--optimizer', default='AdamW', type=str, metavar='OPT',
                     help='optimizer [SGD|Adam|AdamW]')
 parser.add_argument('--momentum', default=0.9, type=float, metavar='M',
@@ -62,8 +62,8 @@ parser.add_argument('--gamma', default=0.9, type=float, metavar='GAMMA',
 parser.add_argument('--wd', '--weight-decay', default=0.03, type=float,
                     metavar='W', help='weight decay (default: 0.03)',
                     dest='weight_decay')
-parser.add_argument('--scheduler', default='cosine', type=str,
-                    metavar='N', help='scheduler [step|exp|cosine]')
+parser.add_argument('--scheduler', default='linear', type=str,
+                    metavar='N', help='scheduler [step|exp|cosine|linear]')
 parser.add_argument('--amp', default="bf16-mixed", type=str,
                     metavar='AMP', help='amp mode: [16-mixed|bf16-mixed]')
 parser.add_argument('--compile', action='store_true', help='compile')
@@ -180,9 +180,14 @@ def main():
         """Sets the learning rate to the initial LR decayed by 0.9 each epoch"""
         main_scheduler = ExponentialLR(optimizer, gamma=args.gamma)
     elif args.scheduler == 'cosine':
-        """Sets the learning rate to the initial LR decayed by 0.9 each epoch"""
+        """Sets the learning rate to the initial LR and end LR"""
         main_scheduler = CosineAnnealingLR(
-            optimizer, iters_per_epoch*args.epochs, eta_min=args.lr_min)
+            optimizer, iters_per_epoch*args.epochs, eta_min=args.lr_end)
+    elif args.scheduler == 'linear':
+        """Sets the learning rate to the initial LR and end LR"""
+        main_scheduler = LinearLR(
+            optimizer, start_factor=1.0, end_factor=args.lr_end/args.lr,
+            total_iters=iters_per_epoch*args.epochs)
     else:
         raise Exception("unknown scheduler: ${args.scheduler}")
 
