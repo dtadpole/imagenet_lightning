@@ -187,7 +187,7 @@ def main():
 
     # warm up with one epoch data
     warmup_scheduler = LinearLR(optimizer, start_factor=1e-4,
-                                end_factor=1.0, total_iters=math.floor(iters_per_epoch/2))
+                                end_factor=1.0, total_iters=math.floor(iters_per_epoch))
     scheduler = ChainedScheduler([warmup_scheduler, main_scheduler])
 
     # setup model and optimizer
