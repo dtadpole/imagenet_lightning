@@ -59,8 +59,8 @@ parser.add_argument('--beta2', default=0.999, type=float, metavar='B2',
                     help='beta2')
 parser.add_argument('--gamma', default=0.9, type=float, metavar='GAMMA',
                     help='gamma')
-parser.add_argument('--wd', '--weight-decay', default=1e-2, type=float,
-                    metavar='W', help='weight decay (default: 1e-2)',
+parser.add_argument('--wd', '--weight-decay', default=1e-3, type=float,
+                    metavar='W', help='weight decay (default: 1e-3)',
                     dest='weight_decay')
 parser.add_argument('--scheduler', default='cosine', type=str,
                     metavar='N', help='scheduler [step|exp|cosine]')
