@@ -199,6 +199,8 @@ def main():
     # setup model and optimizer
     model, optimizer = fabric.setup(model, optimizer)
 
+    print(model)
+
     if args.compile:
         model = torch.compile(model)
 
