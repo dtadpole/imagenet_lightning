@@ -47,7 +47,7 @@ parser.add_argument('-b', '--batch-size', default=256, type=int,
                          'using Data Parallel or Distributed Data Parallel')
 parser.add_argument('--lr', '--learning-rate', default=3e-4, type=float,
                     metavar='LR', help='initial learning rate', dest='lr')
-parser.add_argument('--le', '--lr-end', default=3e-5, type=float,
+parser.add_argument('--lr-end', default=3e-5, type=float,
                     metavar='LREND', help='lr end')
 parser.add_argument('--optimizer', default='AdamW', type=str, metavar='OPT',
                     help='optimizer [SGD|Adam|AdamW]')
