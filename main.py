@@ -53,6 +53,8 @@ parser.add_argument('--optimizer', default='AdamW', type=str, metavar='OPT',
                     help='optimizer [SGD|Adam|AdamW]')
 parser.add_argument('--momentum', default=0.9, type=float, metavar='M',
                     help='momentum')
+parser.add_argument('--dropout', default=0.1, type=float, metavar='DROPOUT',
+                    help='dropout')
 parser.add_argument('--beta1', default=0.9, type=float, metavar='B1',
                     help='beta1')
 parser.add_argument('--beta2', default=0.999, type=float, metavar='B2',
@@ -151,7 +153,7 @@ def main():
         model = models.__dict__[args.arch](pretrained=True)
     else:
         print("=> creating model '{}'".format(args.arch))
-        model = models.__dict__[args.arch]()
+        model = models.__dict__[args.arch](dropout=args.dropout)
 
     if args.optimizer == 'SGD':
         optimizer = torch.optim.SGD(model.parameters(), args.lr,
