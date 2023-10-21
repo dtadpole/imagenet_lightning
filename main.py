@@ -45,10 +45,10 @@ parser.add_argument('-b', '--batch-size', default=256, type=int,
                     help='mini-batch size (default: 256), this is the total '
                          'batch size of all GPUs on the current node when '
                          'using Data Parallel or Distributed Data Parallel')
-parser.add_argument('--lr', '--learning-rate', default=1e-4, type=float,
+parser.add_argument('--lr', '--learning-rate', default=3e-4, type=float,
                     metavar='LR', help='initial learning rate', dest='lr')
-parser.add_argument('--lr-end', default=1e-5, type=float, metavar='LREND',
-                    help='lr-end (default: 1e-5)')
+parser.add_argument('--le', '--lr-end', default=3e-5, type=float,
+                    metavar='LREND', help='lr end')
 parser.add_argument('--optimizer', default='AdamW', type=str, metavar='OPT',
                     help='optimizer [SGD|Adam|AdamW]')
 parser.add_argument('--momentum', default=0.9, type=float, metavar='M',
@@ -61,8 +61,8 @@ parser.add_argument('--beta2', default=0.999, type=float, metavar='B2',
                     help='beta2')
 parser.add_argument('--gamma', default=0.9, type=float, metavar='GAMMA',
                     help='gamma')
-parser.add_argument('--wd', '--weight-decay', default=0.01, type=float,
-                    metavar='W', help='weight decay (default: 0.01)',
+parser.add_argument('--wd', '--weight-decay', default=0.3, type=float,
+                    metavar='W', help='weight decay (default: 0.3)',
                     dest='weight_decay')
 parser.add_argument('--scheduler', default='linear', type=str,
                     metavar='N', help='scheduler [step|exp|cosine|linear]')
@@ -153,7 +153,8 @@ def main():
         model = models.__dict__[args.arch](pretrained=True)
     else:
         print("=> creating model '{}'".format(args.arch))
-        model = models.__dict__[args.arch](dropout=args.dropout)
+        # model = models.__dict__[args.arch]()
+        model = models.__dict__[args.arch](dropout=args.dropout, attention_dropout=args.dropout)
 
     if args.optimizer == 'SGD':
         optimizer = torch.optim.SGD(model.parameters(), args.lr,
