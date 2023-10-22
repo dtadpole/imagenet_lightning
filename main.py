@@ -45,7 +45,7 @@ parser.add_argument('-b', '--batch-size', default=256, type=int,
                     help='mini-batch size (default: 256), this is the total '
                          'batch size of all GPUs on the current node when '
                          'using Data Parallel or Distributed Data Parallel')
-parser.add_argument('--lr', '--learning-rate', default=3e-4, type=float,
+parser.add_argument('--lr', '--learning-rate', default=1e-3, type=float,
                     metavar='LR', help='initial learning rate', dest='lr')
 parser.add_argument('--lr-end', default=3e-5, type=float,
                     metavar='LREND', help='lr end')
@@ -61,8 +61,8 @@ parser.add_argument('--beta2', default=0.999, type=float, metavar='B2',
                     help='beta2')
 parser.add_argument('--gamma', default=0.9, type=float, metavar='GAMMA',
                     help='gamma')
-parser.add_argument('--wd', '--weight-decay', default=0.3, type=float,
-                    metavar='W', help='weight decay (default: 0.3)',
+parser.add_argument('--wd', '--weight-decay', default=0.1, type=float,
+                    metavar='W', help='weight decay (default: 0.1)',
                     dest='weight_decay')
 parser.add_argument('--scheduler', default='linear', type=str,
                     metavar='N', help='scheduler [step|exp|cosine|linear]')
@@ -153,8 +153,11 @@ def main():
         model = models.__dict__[args.arch](pretrained=True)
     else:
         print("=> creating model '{}'".format(args.arch))
-        # model = models.__dict__[args.arch]()
-        model = models.__dict__[args.arch](dropout=args.dropout, attention_dropout=args.dropout)
+        if 'vit' in args.arch:
+            model = models.__dict__[args.arch](dropout=args.dropout, attention_dropout=args.dropout)
+        else:
+            model = models.__dict__[args.arch]()
+
 
     if args.optimizer == 'SGD':
         optimizer = torch.optim.SGD(model.parameters(), args.lr,
@@ -202,7 +205,7 @@ def main():
     # setup model and optimizer
     model, optimizer = fabric.setup(model, optimizer)
 
-    print(model)
+    # print(model)
 
     if args.compile:
         model = torch.compile(model)
@@ -231,6 +234,12 @@ def main():
             val_dataset, batch_size=args.batch_size, shuffle=True,
             num_workers=args.workers, pin_memory=True,
             prefetch_factor=5)
+
+    # evaluate only
+    if args.evaluate:
+        # evaluate
+        validate(val_loader, model, criterion, fabric, args)
+        exit(0)
 
     # fabric data loader
     train_loader, val_loader = fabric.setup_dataloaders(train_loader, val_loader)
