@@ -153,7 +153,7 @@ def main():
         model = models.__dict__[args.arch](pretrained=True)
     else:
         print("=> creating model '{}'".format(args.arch))
-        if 'vit' in args.arch:
+        if args.arch.startswith('vit'):
             model = models.__dict__[args.arch](dropout=args.dropout, attention_dropout=args.dropout)
         else:
             model = models.__dict__[args.arch]()
