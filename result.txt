@@ -330,6 +330,12 @@ gpu=None, resume='', evaluate=False, pretrained=False, world_size=1, dummy=False
 #35 *   Acc@1 62.391 Acc@5 84.824
 ..
 #40 *   Acc@1 64.155 Acc@5 86.444
+..
+#45 *   Acc@1 63.699 Acc@5 85.886
+
+==============================
+
+
 
 ############################################################
 
@@ -362,5 +368,15 @@ gpu=None, resume='', evaluate=False, pretrained=False, world_size=1, dummy=False
 #2  *   Acc@1 39.147 Acc@5 66.199
 #3  *   Acc@1 45.961 Acc@5 72.647
 #4
+
+==============================
+
+#0  *   Acc@1 7.730 Acc@5 22.710
+
+(data='./imagenet/', arch='maxvit_t', workers=5, epochs=60, start_epoch=0, batch_size=128, lr=0.0003, lr_end=3e-05, optimizer='AdamW', momentum=0.9,
+dropout=0.1, beta1=0.9, beta2=0.999, gamma=0.9, weight_decay=0.1, scheduler='cosine', warmup_epoch=2, amp='bf16-mixed', compile=True, deepspeed=False,
+print_freq=100, gpu=None, resume='', evaluate=False, pretrained=False, world_size=1, dummy=False)
+
+#0
 
 ############################################################

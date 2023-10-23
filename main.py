@@ -38,7 +38,7 @@ parser.add_argument('-a', '--arch', metavar='ARCH', default='vit_b_16',
                     help='model architecture: (default: vit_b_16)')
 parser.add_argument('-j', '--workers', default=5, type=int, metavar='N',
                     help='number of data loading workers (default: 5)')
-parser.add_argument('--epochs', default=100, type=int, metavar='N',
+parser.add_argument('--epochs', default=60, type=int, metavar='N',
                     help='number of total epochs to run')
 parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
                     help='manual epoch number (useful on restarts)')
