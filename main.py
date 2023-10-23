@@ -16,9 +16,11 @@ import torch.nn.parallel
 import torch.optim
 import torch.utils.data
 import torch.utils.data.distributed
+import torchvision
 import torchvision.datasets as datasets
 import torchvision.models as models
 import torchvision.transforms as transforms
+import torchvision.transforms.v2 as v2
 from torch.optim.lr_scheduler import StepLR, ExponentialLR, LinearLR, ChainedScheduler, CosineAnnealingLR
 from torch.utils.data import Subset
 import lightning as L
@@ -66,6 +68,8 @@ parser.add_argument('--wd', '--weight-decay', default=0.1, type=float,
                     dest='weight_decay')
 parser.add_argument('--scheduler', default='linear', type=str,
                     metavar='N', help='scheduler [step|exp|cosine|linear]')
+parser.add_argument('--warmup-epoch', default=2, type=float,
+                    help='warmup epoch (default: 2)')
 parser.add_argument('--amp', default="bf16-mixed", type=str,
                     metavar='AMP', help='amp mode: [16-mixed|bf16-mixed]')
 parser.add_argument('--compile', action='store_true', help='compile')
@@ -123,16 +127,20 @@ def main():
     else:
         traindir = os.path.join(args.data, 'train')
         valdir = os.path.join(args.data, 'val')
-        normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                         std=[0.229, 0.224, 0.225])
+        # normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
+        #                                  std=[0.229, 0.224, 0.225])
 
         train_dataset = datasets.ImageFolder(
             traindir,
             transforms.Compose([
-                transforms.RandomResizedCrop(224, scale=(0.25, 1.0)),
-                transforms.RandomHorizontalFlip(),
+                transforms.RandAugment(num_ops=2, magnitude=15),
+                # v2.MixUp(alpha=0.8, num_classes=1000),
+                # transforms.RandomResizedCrop(224),
+                # transforms.RandomHorizontalFlip(),
+                transforms.Resize(256),
+                transforms.CenterCrop(224),
                 transforms.ToTensor(),
-                normalize,
+                # normalize,
             ]))
 
         val_dataset = datasets.ImageFolder(
@@ -141,7 +149,7 @@ def main():
                 transforms.Resize(256),
                 transforms.CenterCrop(224),
                 transforms.ToTensor(),
-                normalize,
+                # normalize,
             ]))
 
     # define loss function (criterion), optimizer, and learning rate scheduler
@@ -199,7 +207,7 @@ def main():
 
     # warm up with one epoch data
     warmup_scheduler = LinearLR(optimizer, start_factor=1e-4,
-                                end_factor=1.0, total_iters=math.floor(iters_per_epoch))
+                                end_factor=1.0, total_iters=math.floor(iters_per_epoch*args.warmup_epoch))
     scheduler = ChainedScheduler([warmup_scheduler, main_scheduler])
 
     # setup model and optimizer
