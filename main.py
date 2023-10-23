@@ -47,7 +47,7 @@ parser.add_argument('-b', '--batch-size', default=256, type=int,
                     help='mini-batch size (default: 256), this is the total '
                          'batch size of all GPUs on the current node when '
                          'using Data Parallel or Distributed Data Parallel')
-parser.add_argument('--lr', '--learning-rate', default=1e-3, type=float,
+parser.add_argument('--lr', '--learning-rate', default=3e-4, type=float,
                     metavar='LR', help='initial learning rate', dest='lr')
 parser.add_argument('--lr-end', default=3e-5, type=float,
                     metavar='LREND', help='lr end')
@@ -57,6 +57,8 @@ parser.add_argument('--momentum', default=0.9, type=float, metavar='M',
                     help='momentum')
 parser.add_argument('--dropout', default=0.1, type=float, metavar='DROPOUT',
                     help='dropout')
+parser.add_argument('--stochastic_dropout', default=0.2, type=float,
+                    help='stochastic dropout (for MaxViT)')
 parser.add_argument('--beta1', default=0.9, type=float, metavar='B1',
                     help='beta1')
 parser.add_argument('--beta2', default=0.999, type=float, metavar='B2',
@@ -68,8 +70,8 @@ parser.add_argument('--wd', '--weight-decay', default=0.1, type=float,
                     dest='weight_decay')
 parser.add_argument('--scheduler', default='linear', type=str,
                     metavar='N', help='scheduler [step|exp|cosine|linear]')
-parser.add_argument('--warmup-epoch', default=2, type=float,
-                    help='warmup epoch (default: 2)')
+parser.add_argument('--warmup-epoch', default=5, type=float,
+                    help='warmup epoch (default: 5)')
 parser.add_argument('--amp', default="bf16-mixed", type=str,
                     metavar='AMP', help='amp mode: [16-mixed|bf16-mixed]')
 parser.add_argument('--compile', action='store_true', help='compile')
@@ -163,6 +165,8 @@ def main():
         print("=> creating model '{}'".format(args.arch))
         if args.arch.startswith('vit'):
             model = models.__dict__[args.arch](dropout=args.dropout, attention_dropout=args.dropout)
+        elif args.arch.startswith('maxvit'):
+            model = models.__dict__[args.arch](stochastic_depth_prob=args.stochastic_dropout)
         else:
             model = models.__dict__[args.arch]()
 

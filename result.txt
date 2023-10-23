@@ -335,7 +335,16 @@ gpu=None, resume='', evaluate=False, pretrained=False, world_size=1, dummy=False
 
 ==============================
 
+(data='./imagenet/', arch='resnet152', workers=5, epochs=60, start_epoch=0, batch_size=112, lr=0.001, lr_end=3e-05, optimizer='AdamW', momentum=0.9,
+dropout=0.1, beta1=0.9, beta2=0.999, gamma=0.9, weight_decay=0.1, scheduler='linear', warmup_epoch=2, amp='bf16-mixed', compile=True, deepspeed=False,
+print_freq=100, gpu=None, resume='', evaluate=False, pretrained=False, world_size=1, dummy=False)
 
+#0  *   Acc@1  7.762 Acc@5 21.168
+#1  *   Acc@1 28.207 Acc@5 53.413
+#2  *   Acc@1 39.699 Acc@5 66.151
+#3  *   Acc@1 47.063 Acc@5 73.055
+#4  *   Acc@1 45.683 Acc@5 71.667
+#5  *   Acc@1 43.111 Acc@5 68.363
 
 ############################################################
 
@@ -367,7 +376,6 @@ gpu=None, resume='', evaluate=False, pretrained=False, world_size=1, dummy=False
 #1  *   Acc@1 28.909 Acc@5 55.297
 #2  *   Acc@1 39.147 Acc@5 66.199
 #3  *   Acc@1 45.961 Acc@5 72.647
-#4
 
 ==============================
 
@@ -377,6 +385,32 @@ gpu=None, resume='', evaluate=False, pretrained=False, world_size=1, dummy=False
 dropout=0.1, beta1=0.9, beta2=0.999, gamma=0.9, weight_decay=0.1, scheduler='cosine', warmup_epoch=2, amp='bf16-mixed', compile=True, deepspeed=False,
 print_freq=100, gpu=None, resume='', evaluate=False, pretrained=False, world_size=1, dummy=False)
 
-#0
+#0  *   Acc@1 7.790 Acc@5 22.426
+#1  *   Acc@1 22.116 Acc@5 47.279
+
+==============================
+
+(data='./imagenet/', arch='maxvit_t', workers=5, epochs=60, start_epoch=0, batch_size=128, lr=0.001, lr_end=3e-05, optimizer='AdamW', momentum=0.9,
+dropout=0.1, stochastic_dropout=0.2, beta1=0.9, beta2=0.999, gamma=0.9, weight_decay=0.1, scheduler='cosine', warmup_epoch=2, amp='bf16-mixed',
+compile=True, deepspeed=False, print_freq=100, gpu=None, resume='', evaluate=False, pretrained=False, world_size=1, dummy=False)
+
+#0  *   Acc@1 11.524 Acc@5 30.529
+#1  *   Acc@1 27.439 Acc@5 53.817
+#2  *   Acc@1 40.843 Acc@5 68.239
+#3  *   Acc@1 47.833 Acc@5 73.961
+#4  *   Acc@1 51.463 Acc@5 77.220
+#5  *   Acc@1 54.213 Acc@5 79.570
+#6  *   Acc@1 56.277 Acc@5 81.028
+#7  *   Acc@1 58.753 Acc@5 82.876
+#8  *   Acc@1 59.649 Acc@5 83.174
+#9  *   Acc@1 60.423 Acc@5 83.894
+#10 *   Acc@1 61.581 Acc@5 84.818
+#11 *   Acc@1 62.021 Acc@5 85.132
+#12 *   Acc@1 63.405 Acc@5 85.754
+#13 *   Acc@1 64.193 Acc@5 86.442
+#14 *   Acc@1 64.751 Acc@5 86.576
+#15 *   Acc@1 65.413 Acc@5 87.024
+#16 *   Acc@1 65.611 Acc@5 87.150
+#17
 
 ############################################################
