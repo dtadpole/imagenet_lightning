@@ -57,8 +57,8 @@ parser.add_argument('--momentum', default=0.9, type=float, metavar='M',
                     help='momentum')
 parser.add_argument('--dropout', default=0.1, type=float, metavar='DROPOUT',
                     help='dropout')
-parser.add_argument('--stochastic_dropout', default=0.2, type=float,
-                    help='stochastic dropout (for MaxViT)')
+# parser.add_argument('--stochastic_dropout', default=0.2, type=float,
+#                     help='stochastic dropout (for MaxViT)')
 parser.add_argument('--beta1', default=0.9, type=float, metavar='B1',
                     help='beta1')
 parser.add_argument('--beta2', default=0.999, type=float, metavar='B2',
@@ -165,8 +165,8 @@ def main():
         print("=> creating model '{}'".format(args.arch))
         if args.arch.startswith('vit'):
             model = models.__dict__[args.arch](dropout=args.dropout, attention_dropout=args.dropout)
-        elif args.arch.startswith('maxvit'):
-            model = models.__dict__[args.arch](stochastic_depth_prob=args.stochastic_dropout)
+        # elif args.arch.startswith('maxvit'):
+        #     model = models.__dict__[args.arch](stochastic_depth_prob=args.stochastic_dropout)
         else:
             model = models.__dict__[args.arch]()
 
