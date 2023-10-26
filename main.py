@@ -21,7 +21,7 @@ import torchvision.datasets as datasets
 import torchvision.models as models
 import torchvision.transforms as transforms
 import torchvision.transforms.v2 as v2
-from torch.optim.lr_scheduler import StepLR, ExponentialLR, LinearLR, ChainedScheduler, CosineAnnealingLR
+from torch.optim.lr_scheduler import StepLR, ExponentialLR, LinearLR, ChainedScheduler, CosineAnnealingLR, CosineAnnealingWarmRestarts
 from torch.utils.data import Subset
 import lightning as L
 from lightning.fabric.accelerators import find_usable_cuda_devices
@@ -38,10 +38,14 @@ parser.add_argument('-a', '--arch', metavar='ARCH', default='vit_b_16',
                     help='model architecture: (default: vit_b_16)')
 parser.add_argument('-j', '--workers', default=5, type=int, metavar='N',
                     help='number of data loading workers (default: 5)')
-parser.add_argument('--epochs', default=90, type=int, metavar='N',
+parser.add_argument('--epochs', default=60, type=int, metavar='N',
                     help='number of total epochs to run')
 parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
                     help='manual epoch number (useful on restarts)')
+parser.add_argument('--warmup-epoch', default=5, type=float,
+                    help='warmup epoch (default: 5)')
+parser.add_argument('--restart-epoch', default=10, type=float,
+                    help='restart epoch (default: 10)')
 parser.add_argument('-b', '--batch-size', default=256, type=int,
                     metavar='N',
                     help='mini-batch size (default: 256), this is the total '
@@ -59,6 +63,10 @@ parser.add_argument('--dropout', default=0.1, type=float, metavar='DROPOUT',
                     help='dropout')
 # parser.add_argument('--stochastic_dropout', default=0.2, type=float,
 #                     help='stochastic dropout (for MaxViT)')
+parser.add_argument('--numops', default=2, type=int,
+                    help='number of ops, default 2')
+parser.add_argument('--magnitude', default=15, type=int,
+                    help="magnitude (default: 15)")
 parser.add_argument('--beta1', default=0.9, type=float, metavar='B1',
                     help='beta1')
 parser.add_argument('--beta2', default=0.999, type=float, metavar='B2',
@@ -68,10 +76,8 @@ parser.add_argument('--gamma', default=0.9, type=float, metavar='GAMMA',
 parser.add_argument('--wd', '--weight-decay', default=0.1, type=float,
                     metavar='W', help='weight decay (default: 0.1)',
                     dest='weight_decay')
-parser.add_argument('--scheduler', default='linear', type=str,
-                    metavar='N', help='scheduler [step|exp|cosine|linear]')
-parser.add_argument('--warmup-epoch', default=5, type=float,
-                    help='warmup epoch (default: 5)')
+parser.add_argument('--scheduler', default='cosineR', type=str,
+                    metavar='N', help='scheduler [step|exp|linear|cosine|cosineR]')
 parser.add_argument('--amp', default="bf16-mixed", type=str,
                     metavar='AMP', help='amp mode: [16-mixed|bf16-mixed]')
 parser.add_argument('--compile', action='store_true', help='compile')
@@ -135,7 +141,7 @@ def main():
         train_dataset = datasets.ImageFolder(
             traindir,
             transforms.Compose([
-                transforms.RandAugment(num_ops=2, magnitude=15),
+                transforms.RandAugment(num_ops=args.numops, magnitude=args.magnitude),
                 # v2.MixUp(alpha=0.8, num_classes=1000),
                 # transforms.RandomResizedCrop(224),
                 # transforms.RandomHorizontalFlip(),
@@ -197,15 +203,19 @@ def main():
     elif args.scheduler == 'exp':
         """Sets the learning rate to the initial LR decayed by 0.9 each epoch"""
         main_scheduler = ExponentialLR(optimizer, gamma=args.gamma)
-    elif args.scheduler == 'cosine':
-        """Sets the learning rate to the initial LR and end LR"""
-        main_scheduler = CosineAnnealingLR(
-            optimizer, iters_per_epoch*args.epochs, eta_min=args.lr_end)
     elif args.scheduler == 'linear':
         """Sets the learning rate to the initial LR and end LR"""
         main_scheduler = LinearLR(
             optimizer, start_factor=1.0, end_factor=args.lr_end/args.lr,
             total_iters=iters_per_epoch*args.epochs)
+    elif args.scheduler == 'cosine':
+        """Sets the learning rate to the initial LR and end LR"""
+        main_scheduler = CosineAnnealingLR(
+            optimizer, iters_per_epoch*args.epochs, eta_min=args.lr_end)
+    elif args.scheduler == 'cosineR':
+        """Sets the learning rate to the initial LR and min LR and restart epochs"""
+        main_scheduler = CosineAnnealingWarmRestarts(
+            optimizer, iters_per_epoch*args.restart_epoch, eta_min=args.lr_end)
     else:
         raise Exception("unknown scheduler: ${args.scheduler}")
 
