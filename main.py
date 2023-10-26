@@ -191,8 +191,8 @@ def main():
     else:
         raise Exception("unknown optimizer: ${args.optimizer}")
 
-    # iters_per_epoch = math.floor(len(train_loader) / args.batch_size)
-    iters_per_epoch = math.floor(
+    # iters_per_epoch = math.ceil(len(train_loader) / args.batch_size)
+    iters_per_epoch = math.ceil(
         len(train_dataset) / args.batch_size / fabric.world_size)
     print(f'iters_per_epoch: {iters_per_epoch}')
 
@@ -222,9 +222,9 @@ def main():
 
     # warm up with one epoch data
     warmup_scheduler = LinearLR(optimizer, start_factor=1e-4,
-                                end_factor=1.0, total_iters=math.floor(iters_per_epoch*args.warmup_epoch))
+                                end_factor=1.0, total_iters=math.ceil(iters_per_epoch*args.warmup_epoch))
     scheduler = SequentialLR(optimizer, schedulers=[warmup_scheduler, main_scheduler],
-                             milestones=[math.floor(iters_per_epoch*args.warmup_epoch)])
+                             milestones=[math.ceil(iters_per_epoch*args.warmup_epoch)])
 
     # setup model and optimizer
     model, optimizer = fabric.setup(model, optimizer)
