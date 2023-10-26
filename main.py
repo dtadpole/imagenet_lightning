@@ -202,7 +202,8 @@ def main():
             optimizer, step_size=2*iters_per_epoch, gamma=args.gamma)
     elif args.scheduler == 'exp':
         """Sets the learning rate to the initial LR decayed by 0.9 each epoch"""
-        main_scheduler = ExponentialLR(optimizer, gamma=args.gamma)
+        main_scheduler = ExponentialLR(
+            optimizer, gamma=args.gamma)
     elif args.scheduler == 'linear':
         """Sets the learning rate to the initial LR and end LR"""
         main_scheduler = LinearLR(
@@ -214,8 +215,10 @@ def main():
             optimizer, iters_per_epoch*args.epochs, eta_min=args.lr_end)
     elif args.scheduler == 'cosineR':
         """Sets the learning rate to the initial LR and min LR and restart epochs"""
-        main_scheduler = CosineAnnealingWarmRestarts(
+        main_scheduler = CosineAnnealingLR(
             optimizer, iters_per_epoch*args.restart_epoch, eta_min=args.lr_end)
+        # main_scheduler = CosineAnnealingWarmRestarts(
+        #     optimizer, iters_per_epoch*args.restart_epoch, eta_min=args.lr_end)
     else:
         raise Exception("unknown scheduler: ${args.scheduler}")
 
