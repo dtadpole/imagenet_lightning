@@ -21,7 +21,7 @@ import torchvision.datasets as datasets
 import torchvision.models as models
 import torchvision.transforms as transforms
 import torchvision.transforms.v2 as v2
-from torch.optim.lr_scheduler import StepLR, ExponentialLR, LinearLR, ChainedScheduler, CosineAnnealingLR, CosineAnnealingWarmRestarts
+from torch.optim.lr_scheduler import StepLR, ExponentialLR, LinearLR, ChainedScheduler, CosineAnnealingLR, CosineAnnealingWarmRestarts, SequentialLR
 from torch.utils.data import Subset
 import lightning as L
 from lightning.fabric.accelerators import find_usable_cuda_devices
@@ -212,20 +212,19 @@ def main():
     elif args.scheduler == 'cosine':
         """Sets the learning rate to the initial LR and end LR"""
         main_scheduler = CosineAnnealingLR(
-            optimizer, iters_per_epoch*args.epochs, eta_min=args.lr_end)
+            optimizer, iters_per_epoch*(args.epochs-args.warmup_epoch), eta_min=args.lr_end)
     elif args.scheduler == 'cosineR':
         """Sets the learning rate to the initial LR and min LR and restart epochs"""
-        main_scheduler = CosineAnnealingLR(
+        main_scheduler = CosineAnnealingWarmRestarts(
             optimizer, iters_per_epoch*args.restart_epoch, eta_min=args.lr_end)
-        # main_scheduler = CosineAnnealingWarmRestarts(
-        #     optimizer, iters_per_epoch*args.restart_epoch, eta_min=args.lr_end)
     else:
         raise Exception("unknown scheduler: ${args.scheduler}")
 
     # warm up with one epoch data
     warmup_scheduler = LinearLR(optimizer, start_factor=1e-4,
                                 end_factor=1.0, total_iters=math.floor(iters_per_epoch*args.warmup_epoch))
-    scheduler = ChainedScheduler([warmup_scheduler, main_scheduler])
+    scheduler = SequentialLR(optimizer, schedulers=[warmup_scheduler, main_scheduler],
+                             milestones=[math.floor(iters_per_epoch*args.warmup_epoch)])
 
     # setup model and optimizer
     model, optimizer = fabric.setup(model, optimizer)
