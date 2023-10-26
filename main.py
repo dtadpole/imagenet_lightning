@@ -44,8 +44,8 @@ parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
                     help='manual epoch number (useful on restarts)')
 parser.add_argument('--warmup-epoch', default=5, type=float,
                     help='warmup epoch (default: 5)')
-parser.add_argument('--restart-epoch', default=10, type=float,
-                    help='restart epoch (default: 10)')
+parser.add_argument('--restart-epoch', default=5, type=float,
+                    help='restart epoch (default: 5)')
 parser.add_argument('-b', '--batch-size', default=256, type=int,
                     metavar='N',
                     help='mini-batch size (default: 256), this is the total '
